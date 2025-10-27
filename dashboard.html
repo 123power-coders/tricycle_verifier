@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="tabaco.png" alt="Tabaco City Logo" class="logo">
+      <h1>Tricycle Franchise Verifier</h1>
+      <button id="logoutBtn" class="logout">Logout</button>
+    </header>
+
+    <section class="main-content">
+      <div class="scanner-section">
+        <video id="preview" width="300" height="200" autoplay>Camera Preview</video>
+        <p>Scan the QR / Barcode from the Tricycle Franchise Permit</p>
+        <input type="text" id="franchiseInput" placeholder="or enter Franchise ID manually">
+        <button id="verify">Verify Franchise</button>
+      </div>
+
+      <div id="result" class="result-section hidden">
+        <h2>Franchise Details</h2>
+        <div id="details"></div>
+        <div id="actionButtons" class="hidden">
+          <button id="printBtn">Print Ticket</button>
+          <button id="reportBtn">Send Report to Office</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const database = [
+      { franchise_id: 'TRI-0001', holder: 'Juan Dela Cruz', plate: 'TCY-1234', route: 'Brgy. San Juan - Market', expiry: '2026-04-30', status: 'Active', other_details: 'Operator contact: 0917-000-111' },
+      { franchise_id: 'TRI-0002', holder: 'Maria Santos', plate: 'TCY-2345', route: 'Brgy. Poblacion - Port', expiry: '2024-09-15', status: 'Expired', other_details: 'Renewal pending' },
+      { franchise_id: 'TRI-0003', holder: 'Pedro Ramos', plate: 'TCY-3456', route: 'Brgy. San Isidro - School', expiry: '2025-12-01', status: 'Active', other_details: 'Issued: 2022-12-02' },
+      { franchise_id: 'TRI-0004', holder: 'Ana Mendoza', plate: 'TCY-4567', route: 'Brgy. Basud - Downtown', expiry: '2023-08-10', status: 'Expired', other_details: 'Renewal not yet applied' },
+      { franchise_id: 'TRI-0005', holder: 'Rico Tolentino', plate: 'TCY-5678', route: 'Brgy. Rawis - City Hall', expiry: '2027-01-15', status: 'Active', other_details: 'Issued: 2024-01-10' }
+    ];
+
+    const franchiseInput = document.getElementById('franchiseInput');
+    const verify = document.getElementById('verify');
+    const result = document.getElementById('result');
+    const details = document.getElementById('details');
+    const actionButtons = document.getElementById('actionButtons');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    verify.addEventListener('click', verifyFranchise);
+
+    function verifyFranchise() {
+      const id = franchiseInput.value.trim().toUpperCase();
+      const record = database.find(item => item.franchise_id === id);
+
+      if (record) {
+        result.classList.remove('hidden');
+        const today = new Date().toISOString().split('T')[0];
+        const expired = new Date(record.expiry) < new Date(today);
+
+        details.innerHTML = `
+          <p><strong>Franchise ID:</strong> ${record.franchise_id}</p>
+          <p><strong>Holder:</strong> ${record.holder}</p>
+          <p><strong>Plate Number:</strong> ${record.plate}</p>
+          <p><strong>Route:</strong> ${record.route}</p>
+          <p><strong>Expiry Date:</strong> ${record.expiry}</p>
+          <p><strong>Status:</strong> <span class="${record.status.toLowerCase()}">${record.status}</span></p>
+          <p><strong>Other Details:</strong> ${record.other_details}</p>
+        `;
+
+        if (expired || record.status === 'Expired') {
+          actionButtons.classList.remove('hidden');
+        } else {
+          actionButtons.classList.add('hidden');
+        }
+      } else {
+        result.classList.remove('hidden');
+        actionButtons.classList.add('hidden');
+        details.innerHTML = '<p class="error">No record found for that Franchise ID.</p>';
+      }
+    }
+
+    document.getElementById('printBtn').addEventListener('click', () => alert('Ticket printed.'));
+    document.getElementById('reportBtn').addEventListener('click', () => alert('Report sent to office.'));
+
+    logoutBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
